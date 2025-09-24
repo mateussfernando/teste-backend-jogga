@@ -59,8 +59,16 @@ teste-backend-jogga/
 git clone https://github.com/mateussfernando/teste-backend-jogga.git
 cd teste-backend-jogga
 ```
+### 2. Configurar Banco de Dados
 
-### 2. Configurar Backend
+Certifique-se de ter o PostgreSQL rodando. O projeto usa Docker Compose:
+
+```bash
+cd backend
+docker-compose up -d
+```
+
+### 3. Configurar Backend
 
 ```bash
 cd backend
@@ -75,7 +83,7 @@ npm run db:push
 npm run db:seed
 ```
 
-### 3. Configurar Frontend
+### 4. Configurar Frontend
 
 ```bash
 cd ../frontend
@@ -84,14 +92,6 @@ cd ../frontend
 npm install
 ```
 
-### 4. Configurar Banco de Dados
-
-Certifique-se de ter o PostgreSQL rodando. O projeto usa Docker Compose:
-
-```bash
-cd backend
-docker-compose up -d
-```
 
 ## 🚀 Como Executar
 
