@@ -28,6 +28,7 @@ Sistema completo para captação e gerenciamento de leads com integração Whats
 
 - Next.js
 - React
+- React
 - Tailwind
 
 ## 📦 Estrutura do Projeto
@@ -60,6 +61,7 @@ teste-backend-jogga/
 git clone https://github.com/mateussfernando/teste-backend-jogga.git
 cd teste-backend-jogga
 ```
+
 
 ### 2. Configurar Banco de Dados
 
