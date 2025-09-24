@@ -1,27 +1,7 @@
-import { PrismaClient } from "@prisma/client";
-import { body, validationResult } from "express-validator";
-
-const prisma = new PrismaClient();
-
-// validações do lead
-export const validateLeadData = [
-  body("nome").notEmpty().withMessage("Nome é obrigatório"),
-  body("email").isEmail().withMessage("Email deve ser válido"),
-  body("telefone").notEmpty().withMessage("Telefone é obrigatório"),
-];
+import prisma from "../utils/prismaClient.js";
 
 export const createLead = async (req, res) => {
   try {
-    // executa validações
-    await Promise.all(
-      validateLeadData.map((validation) => validation.run(req))
-    );
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { nome, email, telefone } = req.body;
 
     // verifica se já existe lead com mesmo email nos últimos 60 minutos
