@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { API_URL } from "../../config/api";
 
-export default function Leads() {
+// componente que usa useSearchParams
+function LeadsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [leads, setLeads] = useState([]);
@@ -32,7 +33,7 @@ export default function Leads() {
       });
 
       if (response.ok) {
-        // Atualizar a lista de leads localmente
+        // atualizar a lista de leads localmente
         setLeads((prevLeads) =>
           prevLeads.map((lead) =>
             lead.id === leadId
@@ -45,16 +46,16 @@ export default function Leads() {
           )
         );
 
-        // Atualizar estatísticas
+        // atualizar estatísticas
         fetchLeads();
       } else {
         const errorData = await response.json();
-        console.error("Erro ao atualizar status:", errorData);
-        alert("Erro ao atualizar status do lead");
+        console.error("erro ao atualizar status:", errorData);
+        alert("erro ao atualizar status do lead");
       }
     } catch (error) {
-      console.error("Erro de conexão ao atualizar status:", error);
-      alert("Erro de conexão ao atualizar status");
+      console.error("erro de conexão ao atualizar status:", error);
+      alert("erro de conexão ao atualizar status");
     } finally {
       setUpdatingStatus((prev) => ({ ...prev, [leadId]: false }));
     }
@@ -78,16 +79,16 @@ export default function Leads() {
         setLeads(data.leads);
         setStats(data.statusCount);
       } else {
-        console.error("Erro ao buscar leads:", data.error);
+        console.error("erro ao buscar leads:", data.error);
       }
     } catch (error) {
-      console.error("Erro de conexão:", error);
+      console.error("erro de conexão:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // carregar dados ao montar componente e quando URL mudar
+  // carregar dados ao montar componente e quando url mudar
   useEffect(() => {
     fetchLeads();
   }, [searchParams]);
@@ -100,11 +101,11 @@ export default function Leads() {
   const getStatusLabel = (status) => {
     switch (status) {
       case "NOVO":
-        return "Novo";
+        return "novo";
       case "EM_CONTATO":
-        return "Em Contato";
+        return "em contato";
       case "CONVERTIDO":
-        return "Convertido";
+        return "convertido";
       default:
         return status;
     }
@@ -127,7 +128,7 @@ export default function Leads() {
     router.push("/leads");
   };
 
-  // função para atualizar status na URL automaticamente
+  // função para atualizar status na url automaticamente
   const handleStatusChange = (newStatus) => {
     setStatusFilter(newStatus);
 
@@ -145,38 +146,38 @@ export default function Leads() {
     <div className="min-h-screen p-4" style={{ backgroundColor: "#d9d9d9" }}>
       <div className="max-w-full mx-auto bg-white rounded-lg shadow-xl p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-black">Leads Cadastrados</h1>
+          <h1 className="text-3xl font-bold text-black">leads cadastrados</h1>
           <button
             onClick={() => router.push("/")}
             className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg"
           >
-            Voltar
+            voltar
           </button>
         </div>
 
-        {/* Estatísticas */}
+        {/* estatísticas */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-gray-100 p-4 rounded-lg text-center">
-              <h3 className="font-semibold text-gray-800">Novos</h3>
+              <h3 className="font-semibold text-gray-800">novos</h3>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.NOVO || 0}
               </p>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg text-center">
-              <h3 className="font-semibold text-gray-800">Em Contato</h3>
+              <h3 className="font-semibold text-gray-800">em contato</h3>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.EM_CONTATO || 0}
               </p>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg text-center">
-              <h3 className="font-semibold text-gray-800">Convertidos</h3>
+              <h3 className="font-semibold text-gray-800">convertidos</h3>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.CONVERTIDO || 0}
               </p>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg text-center">
-              <h3 className="font-semibold text-gray-800">Total</h3>
+              <h3 className="font-semibold text-gray-800">total</h3>
               <p className="text-2xl font-bold text-gray-900">
                 {(stats.NOVO || 0) +
                   (stats.EM_CONTATO || 0) +
@@ -186,61 +187,61 @@ export default function Leads() {
           </div>
         )}
 
-        {/* Filtros */}
+        {/* filtros */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-black mb-2">
-              Buscar por nome ou email
+              buscar por nome ou email
             </label>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Digite nome ou email..."
+              placeholder="digite nome ou email..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-black mb-2">
-              Filtrar por status
+              filtrar por status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => handleStatusChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none"
             >
-              <option value="">Todos os status</option>
-              <option value="NOVO">Novo</option>
-              <option value="EM_CONTATO">Em Contato</option>
-              <option value="CONVERTIDO">Convertido</option>
+              <option value="">todos os status</option>
+              <option value="NOVO">novo</option>
+              <option value="EM_CONTATO">em contato</option>
+              <option value="CONVERTIDO">convertido</option>
             </select>
           </div>
         </div>
 
-        {/* Botões de ação */}
+        {/* botões de ação */}
         <div className="flex gap-4 mb-6">
           <button
             onClick={applyFilters}
             className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg"
           >
-            Aplicar Filtros
+            aplicar filtros
           </button>
           <button
             onClick={clearFilters}
             className="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg"
           >
-            Limpar Filtros
+            limpar filtros
           </button>
         </div>
 
-        {/* Lista de Leads */}
+        {/* lista de leads */}
         {loading ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">Carregando leads...</p>
+            <p className="text-gray-600">carregando leads...</p>
           </div>
         ) : leads.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">Nenhum lead encontrado</p>
+            <p className="text-gray-600">nenhum lead encontrado</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -248,28 +249,28 @@ export default function Leads() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
+                    id
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nome
+                    nome
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                    email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Telefone
+                    telefone
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Data de Cadastro
+                    data de cadastro
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Última Atualização
+                    última atualização
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
+                    ações
                   </th>
                 </tr>
               </thead>
@@ -308,13 +309,13 @@ export default function Leads() {
                         disabled={updatingStatus[lead.id]}
                         className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="NOVO">Novo</option>
-                        <option value="EM_CONTATO">Em Contato</option>
-                        <option value="CONVERTIDO">Convertido</option>
+                        <option value="NOVO">novo</option>
+                        <option value="EM_CONTATO">em contato</option>
+                        <option value="CONVERTIDO">convertido</option>
                       </select>
                       {updatingStatus[lead.id] && (
                         <span className="ml-2 text-xs text-gray-500">
-                          Atualizando...
+                          atualizando...
                         </span>
                       )}
                     </td>
@@ -326,5 +327,20 @@ export default function Leads() {
         )}
       </div>
     </div>
+  );
+}
+
+// componente principal com suspense
+export default function Leads() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-gray-600">carregando...</p>
+        </div>
+      }
+    >
+      <LeadsContent />
+    </Suspense>
   );
 }
