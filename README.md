@@ -251,7 +251,6 @@ Atualiza status de um lead
     "id": 1,
     "status": "EM_CONTATO",
     "updatedAt": "2025-09-24T11:00:00.000Z"
-    // ... outros campos
   }
 }
 ```
