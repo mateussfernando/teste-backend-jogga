@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "build": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
-    "dev": "node src/server.js",
     "studio": "prisma studio --port 5555"
   },
   "keywords": [],
