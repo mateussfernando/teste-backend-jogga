@@ -2,6 +2,11 @@
 
 Sistema completo para captação e gerenciamento de leads com integração WhatsApp, desenvolvido para o teste técnico Backend Júnior/Pleno.
 
+## 🌐 URLs de Produção
+
+- **Frontend:** https://lead-capture-zu3u.onrender.com/
+- **API Backend:** https://leads-api-rzdz.onrender.com/
+
 ## 📋 Funcionalidades
 
 - ✅ **Captação de Leads**: Formulário com campos obrigatórios (Nome, E-mail, Telefone)
@@ -25,7 +30,7 @@ Sistema completo para captação e gerenciamento de leads com integração Whats
 **Frontend:**
 
 - Next.js
-- React 
+- React
 - Tailwind
 
 ## 📦 Estrutura do Projeto
@@ -58,6 +63,7 @@ teste-backend-jogga/
 git clone https://github.com/mateussfernando/teste-backend-jogga.git
 cd teste-backend-jogga
 ```
+
 ### 2. Configurar Banco de Dados
 
 Certifique-se de ter o PostgreSQL rodando. O projeto usa Docker Compose:
@@ -91,7 +97,6 @@ cd ../frontend
 # Instalar dependências
 npm install
 ```
-
 
 ## 🚀 Como Executar
 
@@ -302,6 +307,5 @@ Retorna URL do WhatsApp para redirecionamento
 - **Status válidos**: NOVO → EM_CONTATO → CONVERTIDO
 - **Timestamps automáticos**: createdAt e updatedAt
 - **Validação backend**: Express Validator para todos endpoints
-
 
 by Mateus Fernando
