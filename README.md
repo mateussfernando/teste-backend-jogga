@@ -37,7 +37,6 @@ teste-backend-jogga/
 │   │   ├── controllers/     # Controladores da API
 │   │   ├── middleware/      # Validações
 │   │   ├── routes/          # Rotas da API
-│   │   ├── utils/           # Utilitários (Prisma Client)
 │   │   └── server.js        # Servidor principal
 │   ├── prisma/
 │   │   ├── schema.prisma    # Schema do banco
@@ -65,7 +64,7 @@ Certifique-se de ter o PostgreSQL rodando. O projeto usa Docker Compose:
 
 ```bash
 cd backend
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 3. Configurar Backend
