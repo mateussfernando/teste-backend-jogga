@@ -1,21 +1,33 @@
-import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { body, validationResult } from "express-validator";
 
-const router = express.Router();
 const prisma = new PrismaClient();
 
-// Validações do formulário
-const validateLead = [
-  body("nome").notEmpty().withMessage("Nome é obrigatório"),
-  body("email").isEmail().withMessage("Email inválido"),
-  body("telefone").notEmpty().withMessage("Telefone é obrigatório"),
+// validações do lead
+const validateLeadData = [
+  body("nome")
+    .notEmpty()
+    .withMessage("nome é obrigatório")
+    .isLength({ min: 2 })
+    .withMessage("nome deve ter pelo menos 2 caracteres"),
+
+  body("email").isEmail().withMessage("email inválido").normalizeEmail(),
+
+  body("telefone")
+    .notEmpty()
+    .withMessage("telefone é obrigatório")
+    .isLength({ min: 10 })
+    .withMessage("telefone deve ter pelo menos 10 caracteres"),
 ];
 
-// POST /api/leads - Cadastrar novo lead
-router.post("/", validateLead, async (req, res) => {
+// criar novo lead
+export const createLead = async (req, res) => {
   try {
-    // Verifica erros de validação
+    // executa validações
+    await Promise.all(
+      validateLeadData.map((validation) => validation.run(req))
+    );
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -23,7 +35,7 @@ router.post("/", validateLead, async (req, res) => {
 
     const { nome, email, telefone } = req.body;
 
-    // Verifica se já existe lead com mesmo email nos últimos 60 minutos
+    // verifica se já existe lead com mesmo email nos últimos 60 minutos
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
     const existingLead = await prisma.lead.findFirst({
@@ -37,48 +49,133 @@ router.post("/", validateLead, async (req, res) => {
 
     if (existingLead) {
       return res.status(400).json({
-        error: "Já existe um lead com este email cadastrado na última hora",
+        error: "já existe um lead com este email cadastrado na última hora",
       });
     }
 
-    // Cria o novo lead
+    // cria o novo lead
     const newLead = await prisma.lead.create({
-      data: {
-        nome,
-        email,
-        telefone,
-      },
+      data: { nome, email, telefone },
     });
 
     res.status(201).json({
-      message: "Lead cadastrado com sucesso!",
+      message: "lead cadastrado com sucesso!",
       lead: newLead,
     });
   } catch (error) {
-    console.error("Erro ao cadastrar lead:", error);
+    console.error("erro ao cadastrar lead:", error);
 
     if (error.code === "P2002") {
-      // Erro de email único do Prisma
       return res.status(400).json({
-        error: "Este email já está cadastrado no sistema",
+        error: "este email já está cadastrado no sistema",
       });
     }
 
-    res.status(500).json({ error: "Erro interno do servidor" });
+    res.status(500).json({ error: "erro interno do servidor" });
   }
-});
+};
 
-router.get("/", async (req, res) => {
+// listar leads com filtros
+export const getLeads = async (req, res) => {
   try {
-    const leads = await prisma.lead.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    res.json(leads);
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar leads" });
-  }
-});
+    const {
+      search,
+      status,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-export default router;
+    // construção dos filtros
+    const where = {};
+
+    // filtro de busca
+    if (search) {
+      where.OR = [
+        { nome: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    // filtro por status
+    if (status) {
+      where.status = status;
+    }
+
+    // filtro por data
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate);
+      if (endDate) where.createdAt.lte = new Date(endDate);
+    }
+
+    // paginação
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // executa consultas em paralelo
+    const [leads, totalLeads, leadsByStatus] = await Promise.all([
+      prisma.lead.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: parseInt(limit),
+      }),
+      prisma.lead.count({ where }),
+      prisma.lead.groupBy({
+        by: ["status"],
+        where: Object.keys(where).length > 0 ? where : {},
+        _count: { id: true },
+      }),
+    ]);
+
+    // formata contagem por status
+    const statusCount = { NOVO: 0, EM_CONTATO: 0, CONVERTIDO: 0 };
+    leadsByStatus.forEach((item) => {
+      statusCount[item.status] = item._count.id;
+    });
+
+    res.json({
+      leads,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalLeads / parseInt(limit)),
+        totalLeads,
+        hasNext: skip + leads.length < totalLeads,
+        hasPrev: parseInt(page) > 1,
+      },
+      filters: { search, status, startDate, endDate },
+      statusCount,
+    });
+  } catch (error) {
+    console.error("erro ao buscar leads:", error);
+    res.status(500).json({ error: "erro ao buscar leads" });
+  }
+};
+
+// estatísticas dos leads
+export const getLeadsStats = async (req, res) => {
+  try {
+    const leadsByStatus = await prisma.lead.groupBy({
+      by: ["status"],
+      _count: { id: true },
+    });
+
+    const totalLeads = await prisma.lead.count();
+
+    const statusCount = {
+      NOVO: 0,
+      EM_CONTATO: 0,
+      CONVERTIDO: 0,
+      TOTAL: totalLeads,
+    };
+    leadsByStatus.forEach((item) => {
+      statusCount[item.status] = item._count.id;
+    });
+
+    res.json(statusCount);
+  } catch (error) {
+    console.error("erro ao buscar estatísticas:", error);
+    res.status(500).json({ error: "erro ao buscar estatísticas" });
+  }
+};
