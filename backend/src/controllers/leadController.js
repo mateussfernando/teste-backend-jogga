@@ -145,3 +145,36 @@ export const getWhatsAppUrl = async (req, res) => {
     res.status(500).json({ error: "Erro ao gerar URL do WhatsApp" });
   }
 };
+
+// Atualizar status do lead
+export const updateLeadStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Verificar se o lead existe
+    const existingLead = await prisma.lead.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!existingLead) {
+      return res.status(404).json({
+        error: "Lead não encontrado",
+      });
+    }
+
+    // Atualizar o status do lead
+    const updatedLead = await prisma.lead.update({
+      where: { id: parseInt(id) },
+      data: { status },
+    });
+
+    res.json({
+      message: "Status do lead atualizado com sucesso!",
+      lead: updatedLead,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar status do lead:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};

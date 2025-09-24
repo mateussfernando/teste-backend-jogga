@@ -6,6 +6,12 @@ export const validateLeadData = [
   body("telefone").notEmpty().withMessage("Telefone é obrigatório"),
 ];
 
+export const validateStatusUpdate = [
+  body("status")
+    .isIn(["NOVO", "EM_CONTATO", "CONVERTIDO"])
+    .withMessage("Status deve ser: NOVO, EM_CONTATO ou CONVERTIDO"),
+];
+
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
