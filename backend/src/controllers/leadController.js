@@ -1,5 +1,9 @@
-import prisma from "../utils/prismaClient.js";
+// configuração do cliente prisma
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
+// criar novo lead
 export const createLead = async (req, res) => {
   try {
     const { nome, email, telefone } = req.body;
@@ -34,6 +38,7 @@ export const createLead = async (req, res) => {
   } catch (error) {
     console.error("erro ao cadastrar lead:", error);
 
+    // erro de email duplicado
     if (error.code === "P2002") {
       return res.status(400).json({
         error: "este email já está cadastrado no sistema",
@@ -52,7 +57,7 @@ export const getLeads = async (req, res) => {
     // construção dos filtros
     const where = {};
 
-    // filtro de busca
+    // filtro de busca por nome ou email
     if (search) {
       where.OR = [
         { nome: { contains: search, mode: "insensitive" } },
@@ -65,19 +70,16 @@ export const getLeads = async (req, res) => {
       where.status = status;
     }
 
-    // filtro por data
+    // filtro por data de criação
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) where.createdAt.gte = new Date(startDate);
       if (endDate) where.createdAt.lte = new Date(endDate);
     }
 
-    // executa consultas em paralelo
+    // executa consultas em paralelo para melhor performance
     const [leads, totalLeads, leadsByStatus] = await Promise.all([
-      prisma.lead.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-      }),
+      prisma.lead.findMany({ where, orderBy: { createdAt: "desc" } }),
       prisma.lead.count({ where }),
       prisma.lead.groupBy({
         by: ["status"],
@@ -131,7 +133,7 @@ export const getLeadsStats = async (req, res) => {
   }
 };
 
-//URL do WhatsApp
+//url do whatsapp
 export const getWhatsAppUrl = async (req, res) => {
   try {
     const whatsappUrl = `https://wa.me/5581999898306`;
@@ -146,13 +148,13 @@ export const getWhatsAppUrl = async (req, res) => {
   }
 };
 
-// Atualizar status do lead
+// atualizar status do lead
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Verificar se o lead existe
+    // verificar se o lead existe
     const existingLead = await prisma.lead.findUnique({
       where: { id: parseInt(id) },
     });
@@ -163,7 +165,7 @@ export const updateLeadStatus = async (req, res) => {
       });
     }
 
-    // Atualizar o status do lead
+    // atualizar o status do lead
     const updatedLead = await prisma.lead.update({
       where: { id: parseInt(id) },
       data: { status },

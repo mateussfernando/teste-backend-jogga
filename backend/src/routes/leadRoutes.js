@@ -1,3 +1,4 @@
+// rotas para gerenciar leads
 import { Router } from "express";
 import {
   createLead,
@@ -14,6 +15,7 @@ import {
 
 const router = Router();
 
+// definição das rotas
 router.post("/", validateLeadData, handleValidationErrors, createLead);
 router.get("/", getLeads);
 router.get("/stats", getLeadsStats);

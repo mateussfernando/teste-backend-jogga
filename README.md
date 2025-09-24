@@ -64,6 +64,7 @@ Certifique-se de ter o PostgreSQL rodando. O projeto usa Docker Compose:
 
 ```bash
 cd backend
+sudo systemctl stop postgresql
 docker compose up -d
 ```
 
