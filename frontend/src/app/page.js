@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "../config/api";
 
 export default function home() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function home() {
 
     try {
       // cadastrar o lead na api
-      const response = await fetch("http://localhost:8000/api/leads", {
+      const response = await fetch(`${API_URL}/api/leads`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,9 +51,7 @@ export default function home() {
 
         // buscar url do whatsapp da api
         try {
-          const whatsappresponse = await fetch(
-            "http://localhost:8000/api/leads/whatsapp"
-          );
+          const whatsappresponse = await fetch(`${API_URL}/api/leads/whatsapp`);
           const whatsappdata = await whatsappresponse.json();
 
           // redirecionar para whatsapp após 2 segundos

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { API_URL } from "../../config/api";
 
 export default function Leads() {
   const router = useRouter();
@@ -22,16 +23,13 @@ export default function Leads() {
     try {
       setUpdatingStatus((prev) => ({ ...prev, [leadId]: true }));
 
-      const response = await fetch(
-        `http://localhost:8000/api/leads/${leadId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/leads/${leadId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (response.ok) {
         // Atualizar a lista de leads localmente
@@ -73,9 +71,7 @@ export default function Leads() {
       if (urlSearch) params.append("search", urlSearch);
       if (urlStatus) params.append("status", urlStatus);
 
-      const response = await fetch(
-        `http://localhost:8000/api/leads?${params.toString()}`
-      );
+      const response = await fetch(`${API_URL}/api/leads?${params.toString()}`);
       const data = await response.json();
 
       if (response.ok) {

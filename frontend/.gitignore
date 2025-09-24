@@ -1,0 +1,22 @@
+# dependências
+node_modules/
+.pnpm-debug.log*
+
+# builds do next.js
+/.next/
+/out/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ambiente
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# turbopack
+.turbo
