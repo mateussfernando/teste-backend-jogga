@@ -129,8 +129,6 @@ npm run studio      # Abre Prisma Studio (porta 5555)
 
 ```bash
 npm run dev         # Inicia aplicação Next.js
-npm run build       # Build para produção
-npm run start       # Inicia servidor de produção
 ```
 
 ### 📝 Leads
