@@ -4,23 +4,12 @@ import { body, validationResult } from "express-validator";
 const prisma = new PrismaClient();
 
 // validações do lead
-const validateLeadData = [
-  body("nome")
-    .notEmpty()
-    .withMessage("nome é obrigatório")
-    .isLength({ min: 2 })
-    .withMessage("nome deve ter pelo menos 2 caracteres"),
-
-  body("email").isEmail().withMessage("email inválido").normalizeEmail(),
-
-  body("telefone")
-    .notEmpty()
-    .withMessage("telefone é obrigatório")
-    .isLength({ min: 10 })
-    .withMessage("telefone deve ter pelo menos 10 caracteres"),
+export const validateLeadData = [
+  body("nome").notEmpty().withMessage("Nome é obrigatório"),
+  body("email").isEmail().withMessage("Email deve ser válido"),
+  body("telefone").notEmpty().withMessage("Telefone é obrigatório"),
 ];
 
-// criar novo lead
 export const createLead = async (req, res) => {
   try {
     // executa validações
@@ -78,14 +67,7 @@ export const createLead = async (req, res) => {
 // listar leads com filtros
 export const getLeads = async (req, res) => {
   try {
-    const {
-      search,
-      status,
-      startDate,
-      endDate,
-      page = 1,
-      limit = 10,
-    } = req.query;
+    const { search, status, startDate, endDate } = req.query;
 
     // construção dos filtros
     const where = {};
@@ -110,16 +92,11 @@ export const getLeads = async (req, res) => {
       if (endDate) where.createdAt.lte = new Date(endDate);
     }
 
-    // paginação
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
     // executa consultas em paralelo
     const [leads, totalLeads, leadsByStatus] = await Promise.all([
       prisma.lead.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        skip,
-        take: parseInt(limit),
       }),
       prisma.lead.count({ where }),
       prisma.lead.groupBy({
@@ -137,13 +114,7 @@ export const getLeads = async (req, res) => {
 
     res.json({
       leads,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(totalLeads / parseInt(limit)),
-        totalLeads,
-        hasNext: skip + leads.length < totalLeads,
-        hasPrev: parseInt(page) > 1,
-      },
+      total: totalLeads,
       filters: { search, status, startDate, endDate },
       statusCount,
     });
@@ -177,5 +148,20 @@ export const getLeadsStats = async (req, res) => {
   } catch (error) {
     console.error("erro ao buscar estatísticas:", error);
     res.status(500).json({ error: "erro ao buscar estatísticas" });
+  }
+};
+
+//URL do WhatsApp
+export const getWhatsAppUrl = async (req, res) => {
+  try {
+    const whatsappUrl = `https://wa.me/5581999898306`;
+
+    res.json({
+      whatsappUrl,
+      numero: "81 99989-8306",
+    });
+  } catch (error) {
+    console.error("Erro ao gerar URL do WhatsApp:", error);
+    res.status(500).json({ error: "Erro ao gerar URL do WhatsApp" });
   }
 };

@@ -4,32 +4,54 @@ import {
   createLead,
   getLeads,
   getLeadsStats,
-} from "./controllers/leadsController.js";
+  getWhatsAppUrl,
+  validateLeadData,
+} from "./leadController.js";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
-// middlewares
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-
-// rotas de leads
-app.post("/api/leads", createLead);
-app.get("/api/leads", getLeads);
+// Rotas da API
+app.post("/api/leads", validateLeadData, createLead);
 app.get("/api/leads/stats", getLeadsStats);
+app.get("/api/leads", getLeads);
+app.get("/api/whatsapp", getWhatsAppUrl);
 
-// rota não encontrada
-app.use("*", (req, res) => {
-  res.status(404).json({ error: "endpoint não encontrado" });
+// Rota de teste
+app.get("/", (req, res) => {
+  res.json({
+    message: "API Backend Leads funcionando!",
+    version: "1.0.0",
+    endpoints: [
+      "POST /api/leads",
+      "GET /api/leads",
+      "GET /api/leads/stats",
+      "GET /api/whatsapp",
+    ],
+  });
 });
 
-// middleware de erro global
+// Middleware para rotas não encontradas
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Rota não encontrada",
+    message: `A rota ${req.method} ${req.path} não existe`,
+  });
+});
+
+// Middleware de tratamento de erros
 app.use((error, req, res, next) => {
-  console.error("erro interno:", error);
-  res.status(500).json({ error: "erro interno do servidor" });
+  console.error("Erro no servidor:", error);
+  res.status(500).json({
+    error: "Erro interno do servidor",
+  });
 });
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Acesse: http://localhost:${PORT}`);
 });

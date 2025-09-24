@@ -7,9 +7,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "dev": "node src/server.js", 
+    "dev": "node src/server.js",
     "studio": "prisma studio --port 5555"
-
   },
   "keywords": [],
   "author": "",
@@ -18,7 +17,7 @@
     "@prisma/client": "^6.16.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "validator": "^13.15.15"
+    "express-validator": "^7.2.1"
   },
   "devDependencies": {
     "prisma": "^6.16.2"
